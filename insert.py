@@ -1,15 +1,16 @@
+
 from database import conn
 from faker import Faker
 from random import randint, uniform, choice
 import time
 import sys
 from gen_cnpj import gera_cnpj
-
+import threading
 
 connection = conn()
 cursor = connection.cursor()
 
-custormers = []
+customers = []
 providers = []
 orders = []
 products = []
@@ -17,18 +18,15 @@ products = []
 fake = Faker('pt_BR')
 
 
-### Creating progress bar
-def progressBar(count_value, total, suffix=''):
-    bar_length = 100
-    filled_up_Length = int(round(bar_length* count_value / float(total)))
-    percentage = round(100.0 * count_value/float(total),1)
-    bar = '=' * filled_up_Length + '-' * (bar_length - filled_up_Length)
-    sys.stdout.write('[%s] %s%s ...%s\r' %(bar, percentage, '%', suffix))
-    sys.stdout.flush()
-    
+# Creating product name
+def create_product():
+    first_name = fake.word()
+    last_name = fake.word()
 
-# 500 customers
-for _ in range(500):
+    return f"{first_name} {last_name}"
+
+# Creating 100 customers
+for _ in range(100):
     
     customer = {
         'name': fake.name(),
@@ -36,9 +34,9 @@ for _ in range(500):
         'email': fake.email(),
         'phone': fake.phone_number()      
     }
-    custormers.append(customer)
+    customers.append(customer)
     
-# 20 providers
+# Creating 20 providers
 for _ in range(20):
     provider = {
         'name': fake.company(),
@@ -47,64 +45,73 @@ for _ in range(20):
     }
     providers.append(provider)
     
-# 1000 products
-for _ in range(1000):
+# Creating 300 products
+for _ in range(300):
     product = {
-        'name': fake.name_nonbinary(),
+        'name': create_product(),
         'price': round(uniform(5, 500), 2),
         'provider_id': choice([i for i in range(len(providers))])
     }
     products.append(product)
     
-# 500 orders
-for _ in range(500):
+# Creating 200 orders
+for _ in range(200):
     order = {
-        'customer_id': choice([i for i in range(len(custormers))]),
+        'customer_id': choice([i for i in range(len(customers))]),
         'product_id': choice([i for i in range(len(products))]),
         'amount': choice([i for i in range(len(products))])
     }
     orders.append(order)
 
-# Save data on the database
-for customer in custormers:
-    cursor.execute(
-        """
-            INSERT INTO customers(name, age, phone, email) VALUES (?, ?, ?, ?)
-        """, (customer['name'], customer['age'], customer['phone'], customer['email'])
-    )
-    connection.commit()
-    time.sleep(1)
-    progressBar(1, len(custormers))
-    
-for provider in providers:
-    cursor.execute(
-        """
-            INSERT INTO providers(name, register, contact) VALUES (?, ?, ?)
-        """, (provider['name'], provider['register'], provider['contact'])
-    )    
+print('Registrando os dados no banco de dados ...')
 
-    connection.commit()
-    time.sleep(1)
-    progressBar(1, len(providers))
-    
-for product in products:
-    cursor.execute(
-        """
-            INSERT INTO products(name, price, provider_id) VALUES (?, ?, ?)
-        """, (product['name'], product['price'], product['provider_id'])
-    )
-    connection.commit()
-    time.sleep(1)
-    progressBar(1, len(products))
-    
-for order in orders:
-    cursor.execute(
-        """
-            INSERT INTO orders(customer_id, product_id, amount) VALUES (?, ?, ?)
-        """, (order['customer_id'], order['product_id'], order['amount'])
-    )
-    connection.commit()
-    time.sleep(1)
-    progressBar(1, len(orders))
-    
+# Save data on the database
+def insert_customers():
+    for customer in customers:
+        cursor.execute(
+            """
+                INSERT INTO customers(name, age, phone, email) VALUES (?, ?, ?, ?)
+            """, (customer['name'], customer['age'], customer['phone'], customer['email'])
+        )
+        connection.commit()
+
+
+def insert_providers():
+    for provider in providers:
+        cursor.execute(
+            """
+                INSERT INTO providers(name, register, contact) VALUES (?, ?, ?)
+            """, (provider['name'], provider['register'], provider['contact'])
+        )    
+
+        connection.commit()
+
+     
+def insert_products():
+    for product in products:
+        cursor.execute(
+            """
+                INSERT INTO products(name, price, provider_id) VALUES (?, ?, ?)
+            """, (product['name'], product['price'], product['provider_id'])
+        )
+        connection.commit()
+
+
+def insert_orders():
+    for order in orders:
+        cursor.execute(
+            """
+                INSERT INTO orders(customer_id, product_id, amount) VALUES (?, ?, ?)
+            """, (order['customer_id'], order['product_id'], order['amount'])
+        )
+        connection.commit()
+
+        
+insert_customers()
+insert_providers()
+insert_products()
+insert_orders()
+
 connection.close()
+
+print('Dados registrados com sucesso !')

@@ -28,7 +28,8 @@ def gera_cnpj():
     digito2 = calcula_digito(cnpj, peso2)
     cnpj.append(int(digito2))
 
-    # Retorna o CNPJ no formato xx.xxx.xxx/0001-yy
-    cnpj_formatado = f"{cnpj[0]}{cnpj[1]}"
+    aux = [str(i) for i in cnpj]
+    
+    # Retorna o CNPJ no formato xxxxxxxx0001yy
+    cnpj_formatado = ''.join(aux)
     return cnpj_formatado
-

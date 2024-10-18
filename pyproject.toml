@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "python-sqlite-example"
+version = "0.1.0"
+description = ""
+authors = ["Uadson Feitosa <uadsonfeitosa@goiania.go.gov.br>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+faker = "^30.6.0"
+zeconfig = "^0.0.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
