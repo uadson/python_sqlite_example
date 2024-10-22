@@ -46,6 +46,7 @@
                 "name": "TEXT NOT NULL",
                 "price": "REAL",
                 "provider_id": "INTEGER",
+                "available": "INTEGER",
                 "FOREIGN KEY (provider_id)": "REFERENCES providers (id)"
             }
         }

@@ -26,7 +26,7 @@ def create_product():
     return f"{first_name} {last_name}"
 
 # Creating 100 customers
-for _ in range(100):
+for _ in range(1000):
     
     customer = {
         'name': fake.name(),
@@ -37,7 +37,7 @@ for _ in range(100):
     customers.append(customer)
     
 # Creating 20 providers
-for _ in range(20):
+for _ in range(100):
     provider = {
         'name': fake.company(),
         'register': gera_cnpj(),
@@ -46,16 +46,17 @@ for _ in range(20):
     providers.append(provider)
     
 # Creating 300 products
-for _ in range(300):
+for _ in range(500):
     product = {
         'name': create_product(),
-        'price': round(uniform(5, 500), 2),
-        'provider_id': choice([i for i in range(len(providers))])
+        'price': round(uniform(1, 500), 2),
+        'provider_id': choice([i for i in range(len(providers))]),
+        'available': randint(0, 500)
     }
     products.append(product)
     
 # Creating 200 orders
-for _ in range(200):
+for _ in range(2000):
     order = {
         'customer_id': choice([i for i in range(len(customers))]),
         'product_id': choice([i for i in range(len(products))]),
@@ -91,8 +92,8 @@ def insert_products():
     for product in products:
         cursor.execute(
             """
-                INSERT INTO products(name, price, provider_id) VALUES (?, ?, ?)
-            """, (product['name'], product['price'], product['provider_id'])
+                INSERT INTO products(name, price, provider_id, available) VALUES (?, ?, ?, ?)
+            """, (product['name'], product['price'], product['provider_id'], product['available'])
         )
         connection.commit()
 
